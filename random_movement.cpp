@@ -9,56 +9,55 @@ void RandomMovementComponent::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_movement_radius"), &RandomMovementComponent::get_movement_radius);
     ClassDB::bind_method(D_METHOD("set_movement_radius", "value"), &RandomMovementComponent::set_movement_radius);
 
-    ClassDB::bind_method(D_METHOD("get_is_actor_attached"), &RandomMovementComponent::get_is_actor_attached);
-    ClassDB::bind_method(D_METHOD("set_is_actor_attached", "value"), &RandomMovementComponent::set_is_actor_attached);
-
     // Registering Properties for the Inspector
-    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "_isActorAttached"), "set_is_actor_attached", "get_is_actor_attached");
     ADD_PROPERTY(PropertyInfo(Variant::BOOL, "_isEnabled"), "set_is_enabled", "get_is_enabled");
-    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "movementRadius", PROPERTY_HINT_RANGE, "0.01,0.1,0.01"), "set_movement_radius", "get_movement_radius");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "_movementRadius", PROPERTY_HINT_RANGE, "0 , 0.1, 0.05"), "set_movement_radius", "get_movement_radius");
 }
 
 RandomMovementComponent::RandomMovementComponent() {
-    _rng.instantiate();
-    _rng->randomize();
+    rng.instantiate();
+    rng->randomize();
 }
 
 RandomMovementComponent::~RandomMovementComponent() {}
 
 void RandomMovementComponent::_ready() {
     // Equivalent to @onready
-    _parentActor = Object::cast_to<Node3D>(get_parent());
-    if (_parentActor) {
-        _parentActorPosition = _parentActor->get_position();
-    }
+    parentActor = Object::cast_to<Node3D>(get_parent());
 }
 
+// Handle the close request notification to free the node when the window is closed.
 void RandomMovementComponent::_notification(int p_what) {
     if (p_what == NOTIFICATION_WM_CLOSE_REQUEST) {
         queue_free();
     }
 }
 
+// This method is called every physics frame. It applies a random offset to the parent actor's position if enabled.
 void RandomMovementComponent::_physics_process(double delta) {
-    if (_isEnabled && _parentActor != nullptr) {
-        Vector3 offset = Vector3(0, 0, 0);
 
-        if (_isActorAttached) {
-            _parentActorPosition = _parentActor->get_position();
-        }
+    // Static variables to store the offset and original position across frames. 
+    // This allows us to reset the position after applying the random offset.
+    Vector3 offset;
+    static Vector3 parentActorPosition;
+    static bool forthcomingOffset = true;
 
-        if (_newOffset) {
-            offset.x = _rng->randf_range(-1.0, 1.0) * movementRadius;
-            offset.y = _rng->randf_range(-1.0, 1.0) * movementRadius;
-            offset.z = _rng->randf_range(-1.0, 1.0) * movementRadius;
+    if (_isEnabled && parentActor != nullptr) {
+
+        // If newOffset is true, generate a new random offset. Otherwise, reset the position to the original.
+        if (forthcomingOffset) {
+
+            parentActorPosition = parentActor->get_position();
+
+            offset.x = rng->randf_range(-1.0, 1.0) * _movementRadius;
+            offset.y = rng->randf_range(-1.0, 1.0) * _movementRadius;
+            offset.z = rng->randf_range(-1.0, 1.0) * _movementRadius;
             
-            _parentActor->set_position(_parentActorPosition + offset);
+            parentActor->set_position(parentActorPosition + offset);
         } else {
-            // Note: In your GDScript, 'offset' was local to the 'if' block. 
-            // To subtract the same offset, it should ideally be stored as a member variable.
-            _parentActor->set_position(_parentActorPosition); 
+            parentActor->set_position(parentActorPosition);
         }
 
-        _newOffset = !_newOffset;
+        forthcomingOffset = !forthcomingOffset; // Toggle for the next frame
     }
 }
