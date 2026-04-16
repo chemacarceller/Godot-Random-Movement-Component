@@ -18,6 +18,8 @@ This repository contains the component's .cpp and -h files, as well as the regis
 
 If you only want to use the module without modifying the code, the .so and .dll files for both denug and pararelease are provided. These must be placed in the res://main/bin directory of your project, as specified in the .gdextension file that is also provided.
 
+Documentation explaining how this component works still needs to be created; however, its use can be seen by studying the Third Person Character Demo project.
+
 =========================================================================
 
 Este es el desarrollo de un componente básico de movimiento aleatorio escrito en C++ diseñado para conectarse a un Node3D en Godot
@@ -37,3 +39,5 @@ La misma demo está disponible para personajes en primera persona en https://joc
 Este repositorio contiene los ficheros .cpp y -h del componente, asi como los ficheros register_types -cpp y .h necesarios para la compilación del módulo
 
 Si lo único que se desea es utilizar es utilizar el módulo sin necesidad de modificar el código, se proporciona los ficheros .so y .dll tanto para denug como pararelease que obigatoriamente deberá situarse en el directorio res://main/bin de tu proyecto tal como se indica en el fichero .gdextension que también se proporciona
+
+Queda pendiente crear una documentación que explique el funcionamiento de este componente, sin embargo estudiando el proyecto demo Third Person Character Demo se puede ver su modo de utilización
