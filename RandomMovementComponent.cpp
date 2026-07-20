@@ -1,6 +1,6 @@
 #include "RandomMovementComponent.h"
 
-// It provides the interface to ClassDB, Godot's internal database of all registered classes.
+// It provides the interface to ClassDB, Godot's internal database of all registered classes
 #include <godot_cpp/core/class_db.hpp>
 
 using namespace godot;
@@ -8,20 +8,20 @@ using namespace godot;
 void RandomMovementComponent::_bind_methods() {
     
     // Record of methods for Godot to see.
-    ClassDB::bind_method(D_METHOD("get_is_enabled"), &RandomMovementComponent::get_is_enabled);
-    ClassDB::bind_method(D_METHOD("set_is_enabled", "value"), &RandomMovementComponent::set_is_enabled);
+    ClassDB::bind_method(D_METHOD("is_enabled"), &RandomMovementComponent::is_enabled);
+    ClassDB::bind_method(D_METHOD("set_enabled", "value"), &RandomMovementComponent::set_enabled);
     
-    ClassDB::bind_method(D_METHOD("get_movement_radius"), &RandomMovementComponent::get_movement_radius);
-    ClassDB::bind_method(D_METHOD("set_movement_radius", "value"), &RandomMovementComponent::set_movement_radius);
+    ClassDB::bind_method(D_METHOD("get_movementRadius"), &RandomMovementComponent::get_movementRadius);
+    ClassDB::bind_method(D_METHOD("set_movementRadius", "value"), &RandomMovementComponent::set_movementRadius);
 
     // Exporting properties (equivalent to @export)
-    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "_isEnabled"), "set_is_enabled", "get_is_enabled");
-    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "_movementRadius", PROPERTY_HINT_RANGE, "0 , 0.1, 0.05"), "set_movement_radius", "get_movement_radius");
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "_isEnabled"), "set_enabled", "is_enabled");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "_movementRadius", PROPERTY_HINT_RANGE, "0 , 0.1, 0.05"), "set_movementRadius", "get_movementRadius");
 }
+
 
 // Constructor and Destructor
 RandomMovementComponent::RandomMovementComponent() {
-
     // Instantiate the RNG and randomize it in the constructor to ensure it's ready for use when the component is added to the scene.
     rng.instantiate();
     rng->randomize();
@@ -34,18 +34,6 @@ RandomMovementComponent::~RandomMovementComponent() {}
 // Equivalent to @onready. This ensures that the parentActor is set up before any physics processing occurs, allowing the component to apply random movement to the parent actor correctly.
 void RandomMovementComponent::_ready() {
     parentActor = Object::cast_to<Node3D>(get_parent());
-}
-
-// This method is called when the node receives a notification. In this case, it listens for the NOTIFICATION_WM_CLOSE_REQUEST notification, which is sent when the window is requested to close. When this notification is received, the component calls queue_free() to free itself from memory, ensuring proper cleanup.
-void RandomMovementComponent::_notification(int p_what) {
-
-    // Check if the notification is a window close request
-
-    if (p_what == NOTIFICATION_WM_CLOSE_REQUEST) {
-        // Free the component from memory when the window is requested to close
-        parentActor->queue_free();
-        parentActor=nullptr;
-    }
 }
 
 // This method is called every physics frame. It applies a random offset to the parent actor's position if enabled.
@@ -100,6 +88,29 @@ void RandomMovementComponent::_physics_process(double delta) {
 
             // Reset to generate a new offset when enabled again
             forthComingOffset = true; 
+        }
+    }
+}
+
+
+// This method is called when the node receives a notification. In this case, it listens for the NOTIFICATION_WM_CLOSE_REQUEST notification, which is sent when the window is requested to close. When this notification is received, the component calls queue_free() to free itself from memory, ensuring proper cleanup.
+void RandomMovementComponent::_notification(int p_what) {
+
+    // Handle the close request notification to ensure that the node is properly freed when the window is closed. This prevents potential memory leaks and ensures that the component is cleaned up correctly when the game is exited.
+    if (p_what == NOTIFICATION_WM_CLOSE_REQUEST) {
+
+        if (parentActor != nullptr) {
+
+            // Get the unique ID that Godot assigned to this instance
+            uint64_t instance_id = parentActor->get_instance_id();
+
+            // Check with ObjectDB if that instance still exists in memory
+            if (ObjectDB::get_instance(ObjectID(instance_id)) != nullptr) {
+
+                // Free the node when the window close request is received. This ensures that the component is properly cleaned up and does not persist in memory after the game is closed.
+                parentActor->queue_free();
+                parentActor = nullptr;
+            }
         }
     }
 }
