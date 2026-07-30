@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="RandomMovementComponent" inherits="Node" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+	</tutorials>
+	<members>
+		<member name="_isEnabled" type="bool" setter="set_enabled" getter="is_enabled" default="true">
+		Indicates if the component is enabled or not
+		</member>
+		<member name="_movementRadius" type="float" setter="set_movementRadius" getter="get_movementRadius" default="0.05">
+		The radius of the circle in which the movement occurs
+		</member>
+	</members>
+</class>
